@@ -70,7 +70,7 @@ if selected_sheet != st.session_state.prev_selected_sheet:
 if selected_sheet:
     col1, col2 = st.columns([1, 1.3]) 
 
-    with col2:
+    with col1:
         st.markdown(f"##### 📅 LiveLab Schedule")
         st.caption("This is your section's full LiveLab schedule — use to double check dates, topics, and plan ahead!")
         # ✅ Google Sheets toggle at bottom of all tabs
@@ -127,7 +127,7 @@ if selected_sheet:
         })
         st.dataframe(display_df, use_container_width=True, hide_index=True, height = 875)
     
-    with col1:
+    with col2:
         st.markdown(f"##### 📣 HQ Announcement Templates")
         st.caption("Quick-access templates you can copy for your Friday announcements, with each one customized based on your LiveLab schedule! Please just use these as *templates*, and feel free to make them your own!")
 
