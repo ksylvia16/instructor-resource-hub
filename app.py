@@ -68,7 +68,7 @@ if selected_sheet != st.session_state.prev_selected_sheet:
 # 📊 Tabs: LiveLab Schedule + HQ Announcements
 # -------------------------------
 if selected_sheet:
-    col1, col2 = st.columns([1, 1.3])  # adjust ratio to your taste
+    col1, col2 = st.columns([1, 1.3]) 
 
     with col2:
         st.markdown(f"##### 📅 LiveLab Schedule")
