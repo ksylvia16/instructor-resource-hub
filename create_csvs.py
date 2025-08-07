@@ -9,7 +9,7 @@ creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", sco
 client = gspread.authorize(creds)
 
 # 2. Open the spreadsheet
-spreadsheet = client.open("Curriculum Schedules All Tracks")  # <-- Replace with your sheet name
+spreadsheet = client.open("Curriculum Schedules All Tracks") 
 
 # 3. Create output folder
 os.makedirs("csv_data", exist_ok=True)
@@ -19,8 +19,8 @@ for ws in spreadsheet.worksheets():
     name = ws.title
     print(f"Exporting: {name}")
 
-    # Pull a limited range (or all values if you want)
-    values = ws.get_all_values("A1:I25")  # You can change this to ws.get_all_values() if needed
+    # Pull a limited range
+    values = ws.get_all_values("A1:I25")
     if not values:
         continue
 
