@@ -1,5 +1,5 @@
 [theme]
-primaryColor = "#B2E1DB"              # Teal from logo
+primaryColor = "#3DB985"              # Teal
 backgroundColor = "#FFFFFF"           # Crisp white background
 secondaryBackgroundColor = "#F7F7F7"  # Soft light gray panels
 textColor = "#2C2C3C"                 # Deep navy for legibility
