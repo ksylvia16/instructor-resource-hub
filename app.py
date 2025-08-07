@@ -36,7 +36,7 @@ with st.sidebar:
     selected_sheet = st.selectbox("Section", [""] + sorted(local_csvs))
 
 if selected_sheet:
-    st.title(f"📚 Instructor Resource Hub — **{selected_sheet}**")
+    st.title(f"📚 Instructor Resource Hub — :blue[**{selected_sheet}**]")
 else:
     st.title("📚 Instructor Resource Hub")
 
@@ -72,7 +72,7 @@ if selected_sheet:
 
     with col2:
         st.markdown(f"##### 📅 LiveLab Schedule")
-        st.caption("This is your section's full LiveLab schedule — double check dates, topics, and plan ahead!")
+        st.caption("This is your section's full LiveLab schedule — use to double check dates, topics, and plan ahead!")
         # ✅ Google Sheets toggle at bottom of all tabs
         st.toggle(
             "Is something missing? Toggle to connect to [this Google Sheet](https://docs.google.com/spreadsheets/d/1uRZxn6l4h41ek2dkR7Dfe-a-vzePoSRYPwaTEi2K6iw/edit?usp=sharing) for the most up-to-date version. _(⚠️ Heads up: Connecting via the API may take a few moments.)_",
