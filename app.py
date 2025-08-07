@@ -130,7 +130,7 @@ if selected_sheet:
     with col2:
         st.markdown(f"##### 📣 HQ Announcement Templates")
         st.caption("Quick-access templates you can copy for your Friday announcements, with each one customized based on your LiveLab schedule! Please just use these as *templates*, and feel free to make them your own!")
-
+        
         if df["date"].notna().any():
             start_date = df["date"].min()
             end_date = df["date"].max()

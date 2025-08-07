@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta
 import pandas as pd
+from utils.edits import PROJECT_DUE_DATES, get_milestone_due_days
+
 
 # -------------------------------
 # 🧹 Clean and Parse Dates
@@ -38,23 +40,6 @@ def add_ordinal_suffix(date):
 
     return date.strftime(f"%A, %B {day}{suffix}")
 
-# -------------------------------
-# 📆 Get Milestone Due Days by Section
-# -------------------------------
-def get_milestone_due_days(section_name):
-    """
-    Returns a list of due days (e.g., ['Sunday', 'Wednesday']) based on section suffix.
-    """
-    suffix = section_name.strip().split()[-1]  # Expects something like "1A", "2B", etc.
-
-    if suffix in ["1A", "2A", "3A"]:
-        return ["Tuesday", "Saturday"]
-    elif suffix in ["1B", "2B"]:
-        return ["Wednesday", "Sunday"]
-    elif suffix == "2C":
-        return ["Thursday", "Monday"]
-    else:
-        return []
 
 # -------------------------------
 # 🗓️ Adjust to Most Recent Friday
@@ -64,7 +49,6 @@ def adjust_to_most_recent_friday(date):
     Given any date, returns the most recent Friday (or the same day if it's already Friday).
     """
     return date - timedelta(days=(date.weekday() - 4) % 7)
-
 
 # -------------------------------
 # 🗓️ Get list of Fridays
@@ -80,14 +64,37 @@ def get_fridays_between(start_date, end_date):
         current += timedelta(weeks=1)
     return fridays
 
+
+
+
+
 # -------------------------------
 # 🗓️ Generate Messages
 # -------------------------------
-
 def generate_friday_messages(df, track, friday_date, section=None):
     import streamlit as st
     from datetime import datetime, timedelta
     import pandas as pd
+    from utils.edits import get_milestone_due_days, PROJECT_DUE_DATES
+
+    def get_custom_project_due_date(milestone_title, section_code, track, override_dict):
+        if not milestone_title or not section_code or not track:
+            return None
+
+        if not isinstance(milestone_title, str):
+            return None
+
+        milestone_key = milestone_title.strip().lower()
+        section_full = f"{track} Section {section_code}".strip().lower()
+
+        for (dict_section, dict_title), due_date in override_dict.items():
+            if (
+                dict_section.strip().lower() == section_full and
+                dict_title.strip().lower() == milestone_key
+            ):
+                return due_date
+        return None
+
 
     if isinstance(friday_date, str):
         try:
@@ -135,25 +142,36 @@ def generate_friday_messages(df, track, friday_date, section=None):
 
         milestone_due = last.get("assignment_due_after", None)
         milestone_due_date = None
-        if pd.notna(milestone_due):
-            due_days = get_milestone_due_days(sec)
-            for day in due_days:
-                idx = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].index(day)
-                possible_due = last_ll_date + timedelta((idx - last_ll_date.weekday()) % 7)
-                if milestone_due_date is None or possible_due < milestone_due_date:
-                    milestone_due_date = possible_due
+
+        # 👉 Try to override with custom project due date
+        override_due = get_custom_project_due_date(milestone_due, sec, track, PROJECT_DUE_DATES)
+        if override_due:
+            milestone_due_date = override_due
+        else:
+            if pd.notna(milestone_due):
+                due_days = get_milestone_due_days(sec)
+                for day in due_days:
+                    idx = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].index(day)
+                    possible_due = last_ll_date + timedelta((idx - last_ll_date.weekday()) % 7)
+                    if milestone_due_date is None or possible_due < milestone_due_date:
+                        milestone_due_date = possible_due
 
         next_milestone_lab = upcoming[upcoming["assignment_due_after"].notna()].iloc[0] if not upcoming[upcoming["assignment_due_after"].notna()].empty else None
         next_milestone = next_milestone_due_date = None
         if next_milestone_lab is not None:
             next_milestone = next_milestone_lab["assignment_due_after"]
             base_date = next_milestone_lab["date"]
-            due_days = get_milestone_due_days(sec)
-            for day in due_days:
-                idx = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].index(day)
-                possible_due = base_date + timedelta((idx - base_date.weekday()) % 7)
-                if next_milestone_due_date is None or possible_due < next_milestone_due_date:
-                    next_milestone_due_date = possible_due
+            # 🧠 Check for override for future milestone too
+            override_next_due = get_custom_project_due_date(next_milestone, sec, track, PROJECT_DUE_DATES)
+            if override_next_due:
+                next_milestone_due_date = override_next_due
+            else:
+                due_days = get_milestone_due_days(sec)
+                for day in due_days:
+                    idx = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].index(day)
+                    possible_due = base_date + timedelta((idx - base_date.weekday()) % 7)
+                    if next_milestone_due_date is None or possible_due < next_milestone_due_date:
+                        next_milestone_due_date = possible_due
 
         with st.expander(f"📢 Post on **:blue[{add_ordinal_suffix(friday_date)}]**"):
             st.warning(f'**INSTRUCTOR SANITY CHECK**: The most recent LiveLab was **{last_ll_num}: {last_ll_title}** on {add_ordinal_suffix(last_ll_date)}', icon="🔎")
@@ -182,8 +200,7 @@ def generate_friday_messages(df, track, friday_date, section=None):
                         st.markdown("📌 No upcoming SkillBuilders found in the schedule.")
             else:
                 st.markdown("⏭️ No upcoming LiveLabs scheduled.")
-            
-            st.markdown("Have a wonderful weekend, and see you all next week!")
 
+            st.markdown("Have a wonderful weekend, and see you all next week!")
 
 
