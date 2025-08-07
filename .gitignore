@@ -203,3 +203,4 @@ __marimo__/
 credentials.json
 .streamlit/secrets.toml
 
+__pycache__/
