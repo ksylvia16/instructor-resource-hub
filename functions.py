@@ -4,9 +4,14 @@
 from datetime import datetime, timedelta
 import re
 import pandas as pd
-from utils.edits import PROJECT_DUE_DATES, get_milestone_due_days
 
-
+try:
+    from utils.edits import PROJECT_DUE_DATES, get_milestone_due_days
+except Exception:
+    PROJECT_DUE_DATES = {}
+    def get_milestone_due_days(_section):
+        return []
+    
 # =========================================================
 # 🧰 General Helpers
 # =========================================================
