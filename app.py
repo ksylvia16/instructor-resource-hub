@@ -74,6 +74,11 @@ if selected_sheet != st.session_state.prev_selected_sheet:
 # -------------------------------
 if selected_sheet:
     st.caption("Use the tabs below — 📅 LiveLab Schedule, 📣 HQ Announcement Templates, and 📝 End-of-LiveLab Reminders—to view different resources available to you.")
+    # ✅ Google Sheets toggle at bottom of all tabs
+    st.toggle(
+        "Is something missing? Toggle to connect to [this Google Sheet](https://docs.google.com/spreadsheets/d/1uRZxn6l4h41ek2dkR7Dfe-a-vzePoSRYPwaTEi2K6iw/edit?usp=sharing) for the most up-to-date version. _(⚠️ Heads up: Connecting via the API may take a few moments.)_",
+        value=st.session_state.get("use_google", False),
+        key="use_google")
 
     tab1, tab2, tab3 = st.tabs([':green-background[:green[**📅 LiveLab Schedule**]]', ':blue-background[:blue[**📣 HQ Announcement Templates**]]', ':violet-background[:violet[**📝 End of LiveLab Reminders**]]']) 
 
@@ -81,11 +86,7 @@ if selected_sheet:
         st.markdown("##### :green-background[:green[**📅 LiveLab Schedule**]]")
 
         st.caption("This is your section's full LiveLab schedule — use to double check dates, topics, and plan ahead!")
-        # ✅ Google Sheets toggle at bottom of all tabs
-        st.toggle(
-            "Is something missing? Toggle to connect to [this Google Sheet](https://docs.google.com/spreadsheets/d/1uRZxn6l4h41ek2dkR7Dfe-a-vzePoSRYPwaTEi2K6iw/edit?usp=sharing) for the most up-to-date version. _(⚠️ Heads up: Connecting via the API may take a few moments.)_",
-            value=st.session_state.get("use_google", False),
-            key="use_google")
+
         
         # Load data
         if st.session_state.get("use_google", False):
