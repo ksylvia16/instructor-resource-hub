@@ -6,13 +6,18 @@ from oauth2client.service_account import ServiceAccountCredentials
 from google.oauth2.service_account import Credentials
 import os
 import json
+
 from functions import (
     clean_and_parse_date,
     add_ordinal_suffix,
     get_milestone_due_days,
     adjust_to_most_recent_friday,
     generate_friday_messages,
-    get_fridays_between
+    get_fridays_between,
+    split_by_part_ll_reset,          
+    build_watch_markdown_part1,     
+    build_watch_markdown_part2,
+    render_end_of_livelab_reminders      
 )
 
 # -------------------------------
@@ -68,10 +73,13 @@ if selected_sheet != st.session_state.prev_selected_sheet:
 # 📊 Tabs: LiveLab Schedule + HQ Announcements
 # -------------------------------
 if selected_sheet:
-    col1, col2 = st.columns([1, 1.3]) 
+    st.caption("Use the tabs below — 📅 LiveLab Schedule, 📣 HQ Announcement Templates, and 📝 End-of-LiveLab Reminders—to view different resources available to you.")
 
-    with col1:
-        st.markdown(f"##### 📅 LiveLab Schedule")
+    tab1, tab2, tab3 = st.tabs([':green-background[:green[**📅 LiveLab Schedule**]]', ':blue-background[:blue[**📣 HQ Announcement Templates**]]', ':violet-background[:violet[**📝 End of LiveLab Reminders**]]']) 
+
+    with tab1:
+        st.markdown("##### :green-background[:green[**📅 LiveLab Schedule**]]")
+
         st.caption("This is your section's full LiveLab schedule — use to double check dates, topics, and plan ahead!")
         # ✅ Google Sheets toggle at bottom of all tabs
         st.toggle(
@@ -127,10 +135,19 @@ if selected_sheet:
         })
         st.dataframe(display_df, use_container_width=True, hide_index=True, height = 875)
     
-    with col2:
-        st.markdown(f"##### 📣 HQ Announcement Templates")
+    with tab2:
+        st.markdown("##### :blue-background[:blue[📣 HQ Announcement Templates]]")
         st.caption("Quick-access templates you can copy for your Friday announcements, with each one customized based on your LiveLab schedule! Please just use these as *templates*, and feel free to make them your own!")
-        
+
+        # --- Two schedules: detect LL reset ---
+        part1_df, part2_df = split_by_part_ll_reset(df)
+        part2_start = part2_df["date"].min() if not part2_df.empty else None
+
+        # Always show Part 1 up top
+        with st.expander(":blue[**📆 SkillBuilder Watch By Schedule**]", expanded=False):
+            st.markdown(build_watch_markdown_part1(part1_df))
+
+        # --- Friday posts + insert Part 2 at the correct time ---
         if df["date"].notna().any():
             start_date = df["date"].min()
             end_date = df["date"].max()
@@ -138,12 +155,33 @@ if selected_sheet:
             track = df["track"].iloc[0] if "track" in df.columns else None
 
             fridays = get_fridays_between(start_date, end_date)
+            part2_inserted = False
 
             for friday in fridays:
+                # Insert Part 2 when we hit its first week
+                if (not part2_inserted) and (part2_start is not None) and (friday >= part2_start):
+                    with st.expander(":blue[**📆 SkillBuilder Watch By Schedule**]", expanded=False):
+                        st.markdown(build_watch_markdown_part2(part2_df))
+                    part2_inserted = True
+
                 generate_friday_messages(df, track, friday, section=section)
 
+            # Edge case: if no Friday matched (e.g., part2 starts after last Friday), append at end
+            if (not part2_inserted) and (part2_start is not None):
+                with st.expander(":blue[**📆 SkillBuilder Watch By Schedule**]", expanded=False):
+                    st.markdown(build_watch_markdown_part2(part2_df))
         else:
             st.warning("⚠️ No dates found in the schedule.")
+
+    with tab3:
+        st.markdown("##### :violet-background[:violet[**📝 End of LiveLab Reminders**]]")
+        st.caption("Use these to close out each LiveLab with clear next steps.")
+
+        # If you want to scope to the current section/track explicitly:
+        curr_section = df["wave_section"].iloc[0] if "wave_section" in df.columns else None
+        curr_track   = df["track"].iloc[0] if "track" in df.columns else None
+        render_end_of_livelab_reminders(df, track=curr_track, section=curr_section)
+
 
 
 else:
@@ -156,5 +194,4 @@ else:
 
 
     st.caption("Have a question, notice something off, or want to request a feature? [Message Katie Sylvia on Slack!](https://podiumglobal.slack.com/team/U03TJUYNSF8)")
-
 
