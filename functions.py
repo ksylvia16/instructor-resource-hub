@@ -192,7 +192,7 @@ def generate_friday_messages(df, track, friday_date, section=None):
                 f'**INSTRUCTOR SANITY CHECK**: The most recent LiveLab was **{last_ll_num}: {last_ll_title}** on {add_ordinal_suffix(last_ll_date)}',
                 icon="🔎"
             )
-            st.markdown("""### Hey everyone! 👋
+            st.markdown("""### Hey everyone!
 
 Thanks for hanging out with me in lab this week! Here's what's coming up ⬇️
 """)
