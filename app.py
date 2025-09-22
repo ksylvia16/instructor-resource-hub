@@ -151,7 +151,7 @@ if selected_sheet:
         # --- Friday posts + insert Part 2 at the correct time ---
         if df["date"].notna().any():
             start_date = df["date"].min()
-            end_date = df["date"].max()
+            end_date = df["date"].max() + pd.Timedelta(days=7)
             section = df["wave_section"].iloc[0] if "wave_section" in df.columns else None
             track = df["track"].iloc[0] if "track" in df.columns else None
 
