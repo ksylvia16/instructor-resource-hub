@@ -192,10 +192,10 @@ def generate_friday_messages(df, track, friday_date, section=None):
                 f'**INSTRUCTOR SANITY CHECK**: The most recent LiveLab was **{last_ll_num}: {last_ll_title}** on {add_ordinal_suffix(last_ll_date)}',
                 icon="🔎"
             )
-            st.markdown("""### Hey everyone!
+            st.subheader("""Hey everyone! 👋
 
 Thanks for hanging out with me in lab this week! Here's what's coming up ⬇️
-""")
+""", anchor=False)
             if milestone_due and milestone_due_date and (next_ll_date is None or milestone_due_date <= next_ll_date):
                 st.markdown(f"🎯 **Don't forget!** **:green[{milestone_due}]** is due on **{add_ordinal_suffix(milestone_due_date)}**. Swing by a drop-in session or reach out to the HelpHub with any questions!")
             elif next_milestone and next_milestone_due_date:
